@@ -1,7 +1,7 @@
 # juliaup
 
-A python package to interface with the [juliaup](https://github.com/JuliaLang/juliaup) Julia
-version manager.
+A Python interface to [juliaup](https://github.com/JuliaLang/juliaup), the Julia version
+manager.
 
 ## Install
 
