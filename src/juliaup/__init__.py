@@ -5,7 +5,7 @@ import shlex
 import shutil
 import subprocess
 import tempfile
-import urllib
+import urllib.request
 
 __version__ = '0.1.0'
 
