@@ -1,4 +1,4 @@
-# juliaup
+# pyjuliaup
 
 A Python interface to [juliaup](https://github.com/JuliaLang/juliaup), the Julia version
 manager.
