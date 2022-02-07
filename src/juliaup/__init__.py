@@ -187,6 +187,10 @@ def update(channel=None):
 def self_update():
     """Update juliaup itself."""
     _run(['self', 'update'])
+    exe = _find()
+    if not exe:
+        raise Exception('Just installed juliaup but cannot find it!')
+    _check(exe)
 
 def meta():
     """The juliaup metadata."""
