@@ -21,12 +21,12 @@ pip install juliaup
   installed versions of Julia.
 
 ### Run juliaup
+- `status()` print the status.
 - `add(channel)` adds a channel.
+- `remove(channel)` removes a channel.
+- `update(channel=None)` updates all channels or the given channel.
 - `default(channel)` sets the default channel.
 - `link(channel, file)` links a Julia executable to a channel.
-- `remove(channel)` removes a channel.
-- `status()` print the status.
-- `update(channel=None)` updates all channels or the given channel.
-- `update_self()` updates juliaup itself.
+- `self_update()` updates juliaup itself.
 - `run(args, **kw)` run juliaup with the given arguments. Keyword arguments are passed on to
   `subprocess.run`.
