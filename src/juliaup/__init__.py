@@ -31,13 +31,13 @@ def depot_dir():
     return STATE['depot_dir']
 
 def dir():
-    """The juliaup directory."""
+    """The JuliaUp directory."""
     if not STATE['dir']:
         STATE['dir'] = os.path.join(depot_dir(), 'juliaup')
     return STATE['dir']
 
 def meta_file():
-    """The juliaup metadata json file."""
+    """The JuliaUp metadata json file."""
     if not STATE['meta_file']:
         STATE['meta_file'] = os.path.join(dir(), 'juliaup.json')
     return STATE['meta_file']
@@ -81,19 +81,19 @@ def _version(exe):
 def _check(exe):
     ver = _version(exe)
     if not ver:
-        raise Exception(f'Not a valid juliaup executable: {exe!r}')
+        raise Exception(f'Not a valid JuliaUp executable: {exe!r}')
     STATE['available'] = True
     STATE['executable'] = exe
     STATE['version'] = ver
 
 def install(interactive=True):
-    """Install juliaup.
+    """Install JuliaUp.
 
     Args:
         interactive: By default this is True, meaning nothing will be installed without
             consent. Set this to False to install without interruption. On Windows this
             passes --accept-package-agreements and --accept-source-agreements to winget.
-            On other operating systems this passes --yes to the juliaup install script.
+            On other operating systems this passes --yes to the JuliaUp install script.
     """
     if os.name == 'nt':
         cmd = ['winget', 'install', 'julia', '--source', 'msstore']
@@ -115,14 +115,14 @@ def install(interactive=True):
             subprocess.run(cmd, check=True)
     exe = _find()
     if not exe:
-        raise Exception('Just installed juliaup but cannot find it!')
+        raise Exception('Just installed JuliaUp but cannot find it!')
     _check(exe)
     return exe
 
 def executable():
-    """Return the juliaup executable.
+    """Return the JuliaUp executable.
 
-    If the executable cannot be found, juliaup will be automatically installed.
+    If the executable cannot be found, JuliaUp will be automatically installed.
     """
     if STATE['available'] is None:
         STATE['available'] = False
@@ -130,7 +130,7 @@ def executable():
         if not exe:
             exe = _find()
         if not exe:
-            print('[juliaup] juliaup is required but not installed. It will now be installed interactively.')
+            print('[juliaup] JuliaUp is required but not installed. It will now be installed interactively.')
             print('[juliaup] Alternatively you may install it following the instructions at')
             print('[juliaup]     https://github.com/JuliaLang/juliaup')
             print('[juliaup] You could instead do juliaup.install(interactive=False).')
@@ -144,7 +144,7 @@ def version():
     return STATE['version']
 
 def available():
-    """Test if juliaup is available."""
+    """Test if JuliaUp is available."""
     if STATE['available'] is None:
         try:
             executable()
@@ -152,10 +152,16 @@ def available():
             STATE['available'] = False
     return STATE['available']
 
-def run(cmd, **kw):
-    if isinstance(cmd, str):
-        cmd = shlex.split(cmd)
-    return subprocess.run([executable(), *cmd], **kw)
+def run(args=[], **kw):
+    """Run JuliaUp.
+
+    Args:
+        args: The arguments to juliaup.
+        kw: Passed on to subprocess.run.
+    """
+    if isinstance(args, str):
+        cmd = shlex.split(args)
+    return subprocess.run([executable(), *args], **kw)
 
 def _run(cmd, **kw):
     run(cmd, check=True, **kw)
@@ -185,14 +191,41 @@ def update(channel=None):
     _run(['update'] if channel is None else ['update', channel])
 
 def self_update():
-    """Update juliaup itself."""
+    """Update JuliaUp itself."""
     _run(['self', 'update'])
     exe = _find()
     if not exe:
-        raise Exception('Just installed juliaup but cannot find it!')
+        raise Exception('Just installed JuliaUp but cannot find it!')
     _check(exe)
 
 def meta():
-    """The juliaup metadata."""
-    with open(meta_file()) as fp:
-        return json.load(fp)
+    """The JuliaUp metadata.
+
+    It is essentially the parsed contents of juliaup.json, except:
+    - paths are absolute
+    - versions now have an 'Executable' key
+    - channels inherit keys from their version
+
+    Hence to get the Julia executable for the channel '1.6' you can do
+        meta()['InstalledChannels']['1.6']['Executable']
+    """
+    # read the metadata
+    fn = meta_file()
+    dn = os.path.dirname(fn)
+    with open(fn) as fp:
+        meta = json.load(fp)
+    versions = meta.get('InstalledVersions', {})
+    channels = meta.get('InstalledChannels', {})
+    # make version.Path absolute
+    # add version.Executable
+    for x in versions.values():
+        if 'Path' in x:
+            x['Path'] = os.path.abspath(os.path.join(dn, x['Path']))
+            x['Executable'] = os.path.abspath(os.path.join(x['Path'], 'bin', 'julia.exe' if os.name=='nt' else 'julia'))
+    # have channels inherit items from their version
+    for x in channels.values():
+        if 'Version' in x and x['Version'] in versions:
+            for (k,v) in versions[x['Version']].items():
+                if k not in x:
+                    x[k] = v
+    return meta
