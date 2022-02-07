@@ -182,7 +182,7 @@ def status():
     _run(['status'])
 
 def update(channel=None):
-    """Update all channels or a single channel."""
+    """Update all channels or the given channel."""
     _run(['update'] if channel is None else ['update', channel])
 
 def self_update():
