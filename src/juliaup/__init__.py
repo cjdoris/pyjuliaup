@@ -99,21 +99,23 @@ def install(interactive=True):
         cmd = ['winget', 'install', 'julia', '--source', 'msstore']
         if not interactive:
             cmd += ['--accept-package-agreements', '--accept-source-agreements']
-        print(f'Installing juliaup: {shlex.join(cmd)}')
+        print(f'[juliaup] Installing: {shlex.join(cmd)}')
         subprocess.run(cmd, check=True)
     else:
         with tempfile.TemporaryDirectory() as dn:
             url = 'https://install.julialang.org'
-            print(f'Downloading juliaup install script: {url}')
+            print(f'[juliaup] Downloading install script: {url}')
             fn = os.path.join(dn, 'script.sh')
             with urllib.request.urlopen(url) as fp:
                 script = fp.read()
             with open(fn, 'wb') as fp:
                 fp.write(script)
             cmd = ['/bin/sh', fn]
-            print(f'Installing juliaup: {shlex.join(cmd)}')
+            print(f'[juliaup] Installing: {shlex.join(cmd)}')
             subprocess.run(cmd, check=True)
     exe = _find()
+    if not exe:
+        raise Exception('Just installed juliaup but cannot find it!')
     _check(exe)
     return exe
 
@@ -128,13 +130,10 @@ def executable():
         if not exe:
             exe = _find()
         if not exe:
-            print('*******')
-            print('*** juliaup is required but not installed. It will now be installed interactively.')
-            print('*** Alternatively you may install it following the instructions at')
-            print('***     https://github.com/JuliaLang/juliaup')
-            print('*** You could instead do juliaup.install(interactive=False).')
-            print('**')
-            print('*')
+            print('[juliaup] juliaup is required but not installed. It will now be installed interactively.')
+            print('[juliaup] Alternatively you may install it following the instructions at')
+            print('[juliaup]     https://github.com/JuliaLang/juliaup')
+            print('[juliaup] You could instead do juliaup.install(interactive=False).')
             exe = install()
         _check(exe)
     return STATE['executable']
