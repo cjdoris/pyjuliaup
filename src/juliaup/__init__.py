@@ -96,7 +96,7 @@ def install(interactive=True):
             On other operating systems this passes --yes to the JuliaUp install script.
     """
     if os.name == 'nt':
-        cmd = ['winget', 'install', 'julia', '--source', 'msstore']
+        cmd = ['winget', 'install', 'julia', '--source', 'msstore', '--force']
         if not interactive:
             cmd += ['--accept-package-agreements', '--accept-source-agreements']
         print(f'[juliaup] Installing: {shlex.join(cmd)}')
